@@ -1,18 +1,31 @@
+// main.cpp
+// Created by Soarex16 on 25.11.2018.
+//
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <ctime>
 
-#define UNVISITED 0
-#define PROCESSING 1
-#define VISITED 2
+enum Colors {
+  UNVISITED,
+  PROCESSING,
+  VISITED
+};
 
 using namespace std;
 
 long long counter = 0;
 
-bool dfs(const std::vector<std::vector<int>>& graph, vector<int>& colors, int v) {
+/**
+ * Depth first search for checking graph acyclicity
+ * @param graph adjacency list of graph
+ * @param colors vector of graph colors
+ * @param v vertex considered in the current step
+ * @return true if during the traversal the already visited vertex was not met
+ */
+bool dfs(const std::vector<std::vector<long>> &graph, vector<long> &colors, long v) {
     counter += 2;
     if (colors[v] == PROCESSING) {
         return true;
@@ -20,7 +33,7 @@ bool dfs(const std::vector<std::vector<int>>& graph, vector<int>& colors, int v)
 
     counter += 2;
     colors[v] = PROCESSING;
-    for (int i = 0; i < graph[v].size(); ++i) {
+    for (long i = 0; i < graph[v].size(); ++i) {
         counter += 4;
         if (colors[graph[v][i]] != VISITED) {
             counter += 3;
@@ -36,22 +49,27 @@ bool dfs(const std::vector<std::vector<int>>& graph, vector<int>& colors, int v)
     return false;
 }
 
-bool acyclic(const std::vector<std::vector<int>>& graph) {
-    vector<int> colors(graph.size(), UNVISITED);
+/**
+ *
+ * @param graph adjacency list of graph
+ * @return is graph acyclic
+ */
+bool acyclic(const std::vector<std::vector<long>> &graph) {
+    vector<long> colors(graph.size(), UNVISITED);
 
-    int i;
+    long i;
     for (i = 0; i < graph.size(); ++i) {
         if (dfs(graph, colors, i))
             break;
-        colors.resize(graph.size(), UNVISITED);
     }
 
     counter += 1;
+    // if all iterations of the loop are executed, then the graph is acyclic
     return (i == graph.size());
 }
 
 int main() {
-    vector<vector<int>> graph;
+    vector<vector<long>> graph;
 
     cout << "Enter file path: ";
     std::string path;
@@ -65,25 +83,23 @@ int main() {
 
     clock_t fileReadBegin = clock();
 
-    int n, e;
-    //cout << "Enter number of vertices in graph: ";
+    long n, e;
     f >> n;
     graph.resize(n);
 
-    //cout << "Enter number of edges in graph: ";
     f >> e;
-    //cout << "Enter edges (Vi, Vj): " << endl;
-    for (int i = 0; i < e; ++i) {
-        int a, b;
+    for (long i = 0; i < e; ++i) {
+        long a, b;
         f >> a >> b;
 
         graph[a].push_back(b);
     }
 
+    f.close();
     clock_t fileReadEnd = clock();
 
-    cout << "Graph was successfully read from file. Reading time: " << double(fileReadEnd - fileReadBegin) /
-        CLOCKS_PER_SEC << " secs." << endl;
+    cout << "Graph was successfully read from file. Reading time: " <<
+            double(fileReadEnd - fileReadBegin) / CLOCKS_PER_SEC << " secs." << endl;
 
     clock_t begin = clock();
     cout << "Is graph acyclic: " << acyclic(graph) << " (1 - y, 0 - n)" << endl;
@@ -91,5 +107,6 @@ int main() {
     cout << "Elapsed time in second: " << double(end - begin) / CLOCKS_PER_SEC << endl;
 
     cout << "Total operations: " << counter << endl;
+
     system("pause");
 }
